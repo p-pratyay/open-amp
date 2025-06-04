@@ -30,9 +30,27 @@ foreach (_app matrix_multiply matrix_multiplyd)
       install (TARGETS ${_app}-static RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     else (${PROJECT_SYSTEM})
       add_executable (${_app}.out ${_sources})
+      link_directories(../../../../libmetal/headerFiles/kernel/freertos/lib)
+      target_sources(${_app}.out PRIVATE ../../../../open-amp/apps/tests/msg/myFunctions.c)
+      target_link_libraries(${_app}.out
+          PRIVATE
+              -Wl,-Map=${_app}.map
+              -Wl,--gc-sections
+              ${_linker_opt}
+              -Wl,--start-group
+              ${OPENAMP_LIB}-static
+              ${_deps}
+              -Wl,--end-group
+      )
+
+      target_link_libraries(${_app}.out
+          PRIVATE
+             /home/pratyay/attempt3/libmetal/headerFiles/kernel/freertos/lib/freertos.am62ax.r5f.ti-arm-clang.release.lib
+      )
+      target_include_directories(${_app}.out PRIVATE ../../../../libmetal/headerFiles/kernel/freertos/FreeRTOS-Kernel/include)
       set_source_files_properties(${_sources} PROPERTIES COMPILE_FLAGS "${_cflags}")
 
-      target_link_libraries(${_app}.out -Wl,-Map=${_app}.map -Wl,--gc-sections ${_linker_opt} -Wl,--start-group ${OPENAMP_LIB}-static ${_deps} -Wl,--end-group)
+      # target_link_libraries(${_app}.out -Wl,-Map=${_app}.map -Wl,--gc-sections ${_linker_opt} -Wl,--start-group ${OPENAMP_LIB}-static ${_deps} -Wl,--end-group)
   
       install (TARGETS ${_app}.out RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     endif (${PROJECT_SYSTEM} STREQUAL "linux" )

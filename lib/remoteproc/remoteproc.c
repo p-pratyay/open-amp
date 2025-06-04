@@ -955,11 +955,13 @@ remoteproc_create_virtio(struct remoteproc *rproc,
 		return NULL;
 	}
 
+	printf("remoteproc_create_virtio: Waiting for remote ready\n");
 	rproc_virtio_wait_remote_ready(vdev);
 
 	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
 	metal_list_add_tail(&rproc->vdevs, &rpvdev->node);
 	num_vrings = vdev_rsc->num_of_vrings;
+	printf("remoteproc_create_virtio: num_vrings=%u\n", num_vrings);
 
 	/* set the notification id for vrings */
 	for (i = 0; i < num_vrings; i++) {
@@ -977,18 +979,26 @@ remoteproc_create_virtio(struct remoteproc *rproc,
 		num_descs = vring_rsc->num;
 		align = vring_rsc->align;
 		size = vring_size(num_descs, align);
+		printf("remoteproc_create_virtio: Setting up vring[%u]: notifyid=%u, da=0x%llx, num_descs=%u, align=%u, size=0x%zx\n",
+		       i, notifyid, (unsigned long long)da, num_descs, align, size);
 		va = remoteproc_mmap(rproc, NULL, &da, size, 0, &io);
-		if (!va)
+		if (!va) {
+			printf("remoteproc_create_virtio: remoteproc_mmap failed for vring[%u], going to err1\n", i);
 			goto err1;
+		}
 		ret = rproc_virtio_init_vring(vdev, i, notifyid,
 					      va, io, num_descs, align);
-		if (ret)
+		if (ret) {
+			printf("remoteproc_create_virtio: rproc_virtio_init_vring failed for vring[%u] (ret=%d), going to err1\n", i, ret);
 			goto err1;
+		}
 	}
+	printf("remoteproc_create_virtio: Successfully created virtio device %p\n", vdev);
 	metal_mutex_release(&rproc->lock);
 	return vdev;
 
 err1:
+	printf("remoteproc_create_virtio: Error occurred, removing virtio device %p\n", vdev);
 	remoteproc_remove_virtio(rproc, vdev);
 	metal_mutex_release(&rproc->lock);
 	return NULL;

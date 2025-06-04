@@ -6,12 +6,12 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
+#include <stdio.h>
 #include <openamp/rpmsg.h>
 #include <metal/alloc.h>
 
 #include "rpmsg_internal.h"
-
+#define LPRINTF(format, ...) printf(format, ##__VA_ARGS__)
 /**
  * @internal
  *
@@ -272,8 +272,13 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
 	int status = RPMSG_SUCCESS;
 	uint32_t addr = src;
 
-	if (!ept || !rdev || !cb)
+	if (!ept || !rdev || !cb){
+		// LPERROR("rpmsg_create_ept: Invalid parameter(s): ept=%p, rdev=%p, cb=%p\n", ept, rdev, cb);
+		// fprintf(stderr, "rpmsg_create_ept: Invalid parameter(s): ept=%p, rdev=%p, cb=%p\n", ept, rdev, cb);
 		return RPMSG_ERR_PARAM;
+
+	}
+		
 
 	metal_mutex_acquire(&rdev->lock);
 	if (src == RPMSG_ADDR_ANY) {
@@ -307,8 +312,17 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
 
 	/* Send NS announcement to remote processor */
 	if (ept->name[0] && rdev->support_ns &&
-	    ept->dest_addr == RPMSG_ADDR_ANY)
+	    ept->dest_addr == RPMSG_ADDR_ANY){
 		status = rpmsg_send_ns_message(ept, RPMSG_NS_CREATE);
+		LPRINTF("rpmsg_send_ns_message status = %d\n", status);
+		if (status < 0) {
+			// LPERROR("rpmsg_send_ns_message failed: %d\n", status);
+			LPRINTF(stderr, "rpmsg_send_ns_message failed: %d\n", status);
+			status = RPMSG_ERR_INIT;
+			goto ret_status;
+		}
+
+	}
 
 	if (status)
 		rpmsg_unregister_endpoint(ept);

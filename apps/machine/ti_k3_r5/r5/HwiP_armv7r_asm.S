@@ -1,4 +1,4 @@
-/*
+/* kendall
  *  Copyright (C) 2018-2021 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without

@@ -19,7 +19,7 @@ extern "C" {
 /**
  * \brief size of memory log for a CPU
  */
-#define DEBUG_LOG_SIZE      ( 4*1024U )
+#define DEBUG_LOG_SIZE      ( 16*1024U )
 
 extern char debug_log_memory[DEBUG_LOG_SIZE];
 
