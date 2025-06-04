@@ -26,15 +26,16 @@ extern "C" {
 #define PRIV_RW_USER_RW     (0x00000003U<<8U) /* Full Access */
 #define DDR_BASE_ADDR       0x80000000u
 
-#define AM64_R5FSS1_0_MAILBOX 0x29040000U
-#define RPMSG_BASE_ADDR       0xA2000000u
-#define RSC_TABLE_BASE_ADDR   0xA2100000u
+#define AM62AX_R5FSS0_0_MAILBOX 0x29020000UL      
+#define RPMSG_BASE_ADDR       0x9B800000U 
+#define RSC_TABLE_BASE_ADDR   0x9B900000U 
 
-#define MAILBOX_BASE_ADDR   AM64_R5FSS1_0_MAILBOX
-#define MAILBOX_NEW_MSG_INT 98
+#define MAILBOX_BASE_ADDR   AM62AX_R5FSS0_0_MAILBOX
+#define MAILBOX_NEW_MSG_INT   242U     //           a53 -> r5f communication 
 
 #ifndef RPMSG_NO_IPI
-#define INT_BASE_ADDR       0x2FFF0000u
+
+#define INT_BASE_ADDR         0x7FF0000U 
 #endif
 
 #define KICK_DEV_NAME         "mailbox"

@@ -63,8 +63,13 @@ void am64_r5_a53_proc_irq_handler(void *args){
 	prproc = rproc->priv;
 
 	// get virtqueue number to clear interrupt
-	MailboxGetMessage(MAILBOX_BASE_ADDR, 1, &msg);
-
+	
+	if (MailboxGetMessage(MAILBOX_BASE_ADDR, 1, &msg) == 0){
+		printf("Received on queue 1: %s\n", &msg);
+	}
+	else{
+		printf("Didn't Receive on queue 1:\n");
+	}
 	if (msg < INT32_MAX)  {
 		virtqueue_id |= 1 << msg;
 		atomic_flag_clear(&prproc->ipi_nokick);
@@ -87,7 +92,7 @@ static struct remoteproc * am64_r5_a53_proc_init(struct remoteproc *rproc,
 
 	#ifndef RPMSG_NO_IPI
 	// enable new message interrupt from the mailbox
-	MailboxEnableNewMsgInt(MAILBOX_BASE_ADDR, 0, 1);
+	MailboxEnableNewMsgInt(MAILBOX_BASE_ADDR, 2, 1);
 
 	// enable mailbox interrupt for r5f
 	HwiP_Params hwiParams;
@@ -267,7 +272,6 @@ int platform_init(int argc, char *argv[], void **platform)
 	*platform = rproc;
 	return 0;
 }
-
 struct  rpmsg_device *
 platform_create_rpmsg_vdev(void *platform, unsigned int vdev_index,
 			   unsigned int role,
@@ -320,7 +324,7 @@ err1:
 	metal_free_memory(rpmsg_vdev);
 	return NULL;
 }
-
+// thus function waits for the message from linux side 
 int platform_poll(void *priv)
 {
 	struct remoteproc *rproc = priv;

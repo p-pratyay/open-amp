@@ -26,7 +26,7 @@
 
 /* Place debug trace buffer in special ELF section */
 #define __section_t(S) __attribute__((__section__(#S)))
-#define __log_shared __section_t(.log_shared_mem)
+#define __log_shared __section_t((.log_shared_mem),aligned (128))
 
 /* ----------- HwiP ----------- */
 #ifndef RPMSG_NO_IPI
@@ -37,24 +37,52 @@ HwiP_Config gHwiConfig = {
 
 // global structures used by MPU and cache init code
 CacheP_Config gCacheConfig = { 1, 0 }; // cache on, no forced writethrough
-MpuP_Config gMpuConfig = { 3, 1, 1 }; // 2 regions, background region on, MPU on
+MpuP_Config gMpuConfig = { 7, 1, 1 }; // 7 regions, background region on, MPU on
 MpuP_RegionConfig gMpuRegionConfig[] =
 {
 	// DDR region
-	{
-		.baseAddr = DDR_BASE_ADDR,
-		.size = MpuP_RegionSize_2G,
-		.attrs = {
-			.isEnable = 1,
-			.isCacheable = 1,
-			.isBufferable = 1,
-			.isSharable = 0,
-			.isExecuteNever = 0,
-			.tex = 7,
-			.accessPerm = MpuP_AP_ALL_RW,
-			.subregionDisableMask = 0x0u,
-		},
-	},
+	    {
+        .baseAddr = 0x0u,
+        .size = MpuP_RegionSize_2G,
+        .attrs = {
+            .isEnable = 1,
+            .isCacheable = 0,
+            .isBufferable = 0,
+            .isSharable = 1,
+            .isExecuteNever = 1,
+            .tex = 0,
+            .accessPerm = MpuP_AP_ALL_RW,
+            .subregionDisableMask = 0x0u
+        },
+    },
+    {
+        .baseAddr = 0x0u,
+        .size = MpuP_RegionSize_32K,
+        .attrs = {
+            .isEnable = 1,
+            .isCacheable = 1,
+            .isBufferable = 1,
+            .isSharable = 0,
+            .isExecuteNever = 0,
+            .tex = 1,
+            .accessPerm = MpuP_AP_ALL_RW,
+            .subregionDisableMask = 0x0u
+        },
+    },
+	    {
+        .baseAddr = 0x9B000000u,
+        .size = MpuP_RegionSize_16M,
+        .attrs = {
+            .isEnable = 1,
+            .isCacheable = 0,
+            .isBufferable = 0,
+            .isSharable = 1,
+            .isExecuteNever = 0,
+            .tex = 1,
+            .accessPerm = MpuP_AP_ALL_RW,
+            .subregionDisableMask = 0x0u
+        },
+    },
 	// rpmsg region
 	{
 		.baseAddr = RPMSG_BASE_ADDR,
@@ -74,7 +102,7 @@ MpuP_RegionConfig gMpuRegionConfig[] =
 	// resource table region
 	{
 		.baseAddr = RSC_TABLE_BASE_ADDR,
-		.size = MpuP_RegionSize_4K,
+		.size = MpuP_RegionSize_1M,
 		.attrs = {
 			.isEnable = 1,
 			.isCacheable = 0,
@@ -86,6 +114,34 @@ MpuP_RegionConfig gMpuRegionConfig[] =
 			.subregionDisableMask = 0x0u,
 		},
 	},
+	{
+        .baseAddr = 0x79100000u,
+        .size = MpuP_RegionSize_512K,
+        .attrs = {
+            .isEnable = 1,
+            .isCacheable = 1,
+            .isBufferable = 1,
+            .isSharable = 0,
+            .isExecuteNever = 0,
+            .tex = 1,
+            .accessPerm = MpuP_AP_ALL_RW,
+            .subregionDisableMask = 0x0u
+        },
+    },
+	{
+        .baseAddr = 0x9C000000u,
+        .size = MpuP_RegionSize_32M,
+        .attrs = {
+            .isEnable = 1,
+            .isCacheable = 0,
+            .isBufferable = 0,
+            .isSharable = 1,
+            .isExecuteNever = 0,
+            .tex = 1,
+            .accessPerm = MpuP_AP_ALL_RW,
+            .subregionDisableMask = 0x0u
+        },
+    },
 };
 
 // NOTE: R5FSS defaults to ARM at reset so these must all be ARM instead of Thumb
@@ -140,7 +196,7 @@ void Default_Handler()
 		;
 }
 
-char __log_shared debug_log_memory[DEBUG_LOG_SIZE];
+char debug_log_memory[DEBUG_LOG_SIZE] __attribute__ ((section (".log_shared_mem"), aligned (128))) ;
 
 extern void CacheP_wb(void *addr, uint32_t size, uint32_t type);
 

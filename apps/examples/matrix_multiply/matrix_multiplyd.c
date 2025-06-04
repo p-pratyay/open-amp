@@ -93,6 +93,23 @@ static void rpmsg_service_unbind(struct rpmsg_endpoint *ept)
 /*-----------------------------------------------------------------------------*
  *  Application
  *-----------------------------------------------------------------------------*/
+// changes 
+
+const char* rpmsg_error_string(int err) {
+    switch (err) {
+        case 0: return "RPMSG_SUCCESS";
+        case -2001: return "RPMSG_ERR_NO_MEM";
+        case -2002: return "RPMSG_ERR_NO_BUFF";
+        case -2003: return "RPMSG_ERR_PARAM";
+        case -2004: return "RPMSG_ERR_DEV_STATE";
+        case -2005: return "RPMSG_ERR_BUFF_SIZE";
+        case -2006: return "RPMSG_ERR_INIT";
+        case -2007: return "RPMSG_ERR_ADDR";
+        case -2008: return "RPMSG_ERR_PERM";
+        default: return "Unknown error";
+    }
+}
+
 int app(struct rpmsg_device *rdev, void *priv)
 {
 	int ret;
@@ -101,9 +118,10 @@ int app(struct rpmsg_device *rdev, void *priv)
 			       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
 			       rpmsg_endpoint_cb,
 			       rpmsg_service_unbind);
-	if (ret) {
-		LPERROR("Failed to create endpoint.\r\n");
-		return -1;
+	if (ret) 
+	{
+    LPERROR("Failed to create endpoint. Error code: %d (%s)\r\n", ret, rpmsg_error_string(ret));
+    return -1;
 	}
 
 	LPRINTF("Waiting for events...\r\n");
@@ -111,6 +129,7 @@ int app(struct rpmsg_device *rdev, void *priv)
 		platform_poll(priv);
 		/* we got a shutdown request, exit */
 		if (shutdown_req) {
+			LPRINTF("Shutdown request received, exiting...\r\n");
 			break;
 		}
 	}

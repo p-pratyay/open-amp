@@ -1,10 +1,12 @@
-__DDR_START__ = 0xA2000000;
+__DDR_START__ = 0x9B800000;
 
 MEMORY
 {
 	TCMA (rwx) : ORIGIN = 0, LENGTH = 0x8000
-	DDR_0 (rwx) : ORIGIN = __DDR_START__ + 0x100000, LENGTH = 0x1000
-	DDR_1 (rwx) : ORIGIN = __DDR_START__ + 0x101000, LENGTH = 0xEFF000
+	DDR_IPC_RESOURCE_TABLE_LINUX (rwx) : ORIGIN =  0x9B900000, LENGTH = 0x400
+	TRACE (rwx) : ORIGIN = 0x9B900400, LENGTH = 0xFFC00
+	DDR_1 (rwx) : ORIGIN = 0x79100000, LENGTH = 0x80000
+	
 }
 
 SECTIONS
@@ -133,12 +135,12 @@ SECTIONS
 	.log_shared_mem :
 	{
 		*(.log_shared_mem*)
-	} > DDR_1
+	} > TRACE
 
 	.resource_table :
 	{
 		*(.resource_table*)
-	} > DDR_0
+	} > DDR_IPC_RESOURCE_TABLE_LINUX
 
 	.bss :
 	{

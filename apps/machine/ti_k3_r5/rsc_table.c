@@ -33,7 +33,7 @@ struct remote_resource_table __resource resource_table =
 {
 	/* table header information */
 	1U, /* we're the first version that implements this */
-	NO_RESOURCE_ENTRIES, /* number of entries */
+	NO_RESOURCE_ENTRIES, /* number of entries */    															
 	{ 0U, 0U, }, /* reserved, must be zero */
 
 	/* offsets to the entries */
@@ -43,7 +43,7 @@ struct remote_resource_table __resource resource_table =
 	},
 
 	/* vdev entry */
-	{ RSC_VDEV, VIRTIO_ID_RPMSG_, 31U, RPMSG_VDEV_DFEATURES, 0U, 0U, 0U, NUM_VRINGS, {0U, 0U}, },
+	{ RSC_VDEV, VIRTIO_ID_RPMSG_, 0U, RPMSG_VDEV_DFEATURES, 0U, 0U, 0U, NUM_VRINGS, {0U, 0U}, },             
 	/* the two vrings */
 	{RING_TX, VRING_ALIGN, VRING_SIZE, 1U, 0U},
 	{RING_RX, VRING_ALIGN, VRING_SIZE, 2U, 0U},
